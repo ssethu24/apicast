@@ -8,6 +8,10 @@ local configuration_loader = require('apicast.configuration_loader')
 local inspect = require('inspect')
 local resolver_cache = require('resty.resolver.cache')
 local env = require('resty.env')
+local policy_schemas_loader = require('apicast.policy_schemas_loader')
+
+local format = string.format
+local concat = table.concat
 
 local live = { status = 'live', success = true }
 
@@ -124,6 +128,27 @@ function _M.info()
   })
 end
 
+function _M.get_all_policy_schemas()
+  local schemas = policy_schemas_loader.get_all()
+  local json_schemas = format('[%s]', concat(schemas, ','))
+
+  ngx.header.content_type = 'application/json; charset=utf-8'
+  ngx.status = ngx.HTTP_OK
+  ngx.say(json_schemas)
+end
+
+function _M.get_policy_schema(name, version)
+  local schema = policy_schemas_loader.get(name, version)
+
+  if schema then
+    ngx.header.content_type = 'application/json; charset=utf-8'
+    ngx.status = ngx.HTTP_OK
+    ngx.say(schema)
+  else
+    return json_response({ error = 'Policy not found.' }, ngx.HTTP_NOT_FOUND)
+  end
+end
+
 local routes = {}
 
 function routes.disabled(r)
@@ -134,6 +159,8 @@ function routes.status(r)
   r:get('/status/info', _M.info)
   r:get('/status/ready', _M.ready)
   r:get('/status/live', _M.live)
+
+  routes.policies(r)
 end
 
 function routes.debug(r)
@@ -147,6 +174,20 @@ function routes.debug(r)
   r:get('/dns/cache', _M.dns_cache)
 
   r:post('/boot', _M.boot)
+
+  routes.policies(r)
+end
+
+function routes.policies(r)
+  r:get('/policies/', _M.get_all_policy_schemas)
+
+  r:get('/policies/:name', function(params)
+    _M.get_policy_schema(params.name)
+  end)
+
+  r:get('/policies/:name/:version', function(params)
+    _M.get_policy_schema(params.name, params.version)
+  end)
 end
 
 function _M.router()
