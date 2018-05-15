@@ -62,14 +62,12 @@ describe('reports batcher', function()
           safe_add = function(_, _, _) return true end,
           incr = function(_, _, _) end
         }
-        local spy_add_dict = spy.on(test_dict, 'safe_add')
         local spy_incr_dict = spy.on(test_dict, 'incr')
         local reports_batcher = ReportsBatcher.new(test_dict, 'batched_reports_locks')
 
         reports_batcher:add(service_id, credentials, usage)
 
-        assert.spy(spy_add_dict).was_called.with(test_dict, report_key, 1)
-        assert.spy(spy_incr_dict).was_not_called()
+        assert.spy(spy_incr_dict).was_called_with(test_dict, report_key, 1)
       end)
     end)
   end)
