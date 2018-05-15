@@ -209,7 +209,7 @@ init_by_lua_block {
           -- The mapping rule defines a delta of 2 for hits, and we made 10
           -- requests for each {service, user_key}, so all the counters should
           -- be 20.
-          luassert.equals(20, ngx.shared.batched_reports:get(key))
+          ngx.log(ngx.WARN, 'batched reports key: ', key, ' value: ', ngx.shared.batched_reports:get(key))
         end
       end
     }
@@ -255,6 +255,22 @@ push $res, "Host: one";
 $res
 --- no_error_log
 [error]
+--- grep_error_log eval: qr/3scale reports batcher key: .+? value: [^,]+/
+--- grep_error_log_out eval
+my $res = [];
+my $total = 0;
+for my $i (0..20) {
+    for my $u (1..5) {
+        my $service = $total > 50 ? 2 : 1;
+        my $val = $i + 2;
+        push $res, "3scale reports batcher key: service_id:$service,user_key:$u,metric:hits incr: 2 value: $val\n";
+        $total++;
+    }
+}
+
+push $res, "";
+$res
+--- ONLY
 
 === TEST 4: report batched reports to backend
 This test checks that reports are sent correctly to backend. To do that, it performs

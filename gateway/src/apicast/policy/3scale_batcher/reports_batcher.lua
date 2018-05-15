@@ -46,15 +46,16 @@ function _M:add(service_id, credentials, usage)
     -- reports, we call `safe_add` and call incr only when there was not an
     -- error because the dict ran out of memory.
 
-    local add_ok, add_err = self.storage:safe_add(key, deltas[metric])
+    local add_ok, add_err = self.storage:safe_add(key, 0)
 
-    if not add_ok then
+    if add_ok or add_err == 'exists' then
+      local value = self.storage:incr(key, deltas[metric])
+      ngx.log(ngx.WARN, '3scale reports batcher key: ', key, ' incr: ', deltas[metric], ' value: ', value)
+    elseif not add_ok then
       if add_err == 'no memory' then
         ngx.log(ngx.ERR,
           'Reports batching storage ran out of memory. ',
           'Will lose a report of ', deltas[metric], ' to metric ', metric)
-      elseif add_err == 'exists' then
-        self.storage:incr(key, deltas[metric])
       else
         ngx.log(ngx.ERR, 'Error while batching report: ', add_err)
       end
