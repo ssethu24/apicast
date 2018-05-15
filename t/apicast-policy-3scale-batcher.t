@@ -165,7 +165,7 @@ init_by_lua_block {
           policy_chain = {
             {
               name = 'apicast.policy.3scale_batcher',
-              configuration = { batch_report_seconds = 60 }
+              configuration = { batch_report_seconds = 10 }
             },
             { name = 'apicast.policy.apicast' }
           }
