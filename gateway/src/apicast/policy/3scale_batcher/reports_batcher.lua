@@ -100,7 +100,7 @@ function _M:get_all(service_id)
   local ok, unlock_err = lock:unlock()
   if not ok then
     ngx.log(ngx.ERR, 'failed to unlock: ', unlock_err)
-    return
+    return nil, unlock_err
   end
 
   return cached_reports

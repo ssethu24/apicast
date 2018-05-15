@@ -252,7 +252,7 @@ push $res, "Host: one";
 
 $res
 --- no_error_log
-[error]
+3scale batcher report timer got
 --- grep_error_log eval: qr/3scale reports batcher key: .+? value: [^,]+/
 --- grep_error_log_out eval
 qr/3scale reports batcher key: service_id:\d,user_key:\d,metric:hits incr: 2 value: \d+/
