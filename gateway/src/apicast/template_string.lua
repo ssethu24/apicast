@@ -55,7 +55,13 @@ local liquid_filters = {
   utctime = ngx.utctime,
   cookie_time = ngx.cookie_time,
   http_time = ngx.http_time,
-  parse_http_time = ngx.parse_http_time
+  parse_http_time = ngx.parse_http_time,
+
+  -- TODO: This is just an example of a filter that could be useful when
+  -- defining conditional policies.
+  get_header = function(header)
+    return ngx.req.get_headers()[header]
+  end
 }
 
 local liquid_filter_set = LiquidFilterSet:new()
