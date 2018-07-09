@@ -1,0 +1,14 @@
+{
+  "$schema": "http://apicast.io/policy-v1/schema#manifest#",
+  "name": "Conditional",
+  "summary": "TODO",
+  "description": "TODO",
+  "version": "builtin",
+  "configuration": {
+    "type": "object",
+    "properties": {
+      "condition": "string"
+    },
+    "required": ["condition"]
+  }
+}
