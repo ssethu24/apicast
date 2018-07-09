@@ -133,4 +133,27 @@ describe('policy', function()
       assert.equal('foobar', property)
     end)
   end)
+
+  it('does not run the phases when the condition specified is false', function()
+    local MyPolicy = policy.new('my_policy', '1.0')
+    MyPolicy.rewrite = function() end -- TODO: using rewrite as an example. We should try all
+    local spy_rewrite = spy.on(MyPolicy , 'rewrite')
+    local p = MyPolicy.new({ condition = 'false' })
+
+    p:rewrite()
+
+    assert.spy(spy_rewrite).was_not_called()
+  end)
+
+  it('runs the phases when the condition specified is true', function()
+    stub(ngx.req, 'get_headers', function() return { Backend = 'prod' } end)
+    local MyPolicy = policy.new('my_policy', '1.0')
+    MyPolicy.rewrite = function() end -- TODO: using rewrite as an example. We should try all
+    local spy_rewrite = spy.on(MyPolicy , 'rewrite')
+    local p = MyPolicy.new({ condition = "get_header('Backend') == 'prod'" })
+
+    p:rewrite()
+
+    assert.spy(spy_rewrite).was_called()
+  end)
 end)
